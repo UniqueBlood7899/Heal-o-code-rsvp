@@ -26,7 +26,7 @@ export function QRScanner({ onScanSuccess, presetField, onScanningStateChange }:
 
   async function handleScanSuccess(srn: string) {
     try {
-      toast('Processing scan for SRN:', srn);
+      toast(`Processing scan for SRN: ${srn}`);
       
       if (!presetField) {
         // If no preset field, just pass the QR code to parent
