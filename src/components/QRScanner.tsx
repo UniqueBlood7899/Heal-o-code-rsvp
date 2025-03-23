@@ -1,4 +1,3 @@
-//src/components/QRScanner.tsx
 import { useEffect, useState, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { toast } from 'react-hot-toast';
@@ -7,11 +6,19 @@ import { supabase } from '../lib/supabase';
 interface QRScannerProps {
   onScanSuccess?: (qrCode: string) => void;
   presetField?: 'entry' | 'dinner' | 'snacks' | 'breakfast' | null;
+  onScanningStateChange?: (isScanning: boolean) => void; // New prop to communicate scanning state
 }
 
-export function QRScanner({ onScanSuccess, presetField }: QRScannerProps) {
+export function QRScanner({ onScanSuccess, presetField, onScanningStateChange }: QRScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+
+  // Notify parent component when scanning state changes
+  useEffect(() => {
+    if (onScanningStateChange) {
+      onScanningStateChange(isScanning);
+    }
+  }, [isScanning, onScanningStateChange]);
 
   function capitalize(word: string) {
     return word.charAt(0).toUpperCase() + word.slice(1);
@@ -19,7 +26,7 @@ export function QRScanner({ onScanSuccess, presetField }: QRScannerProps) {
 
   async function handleScanSuccess(srn: string) {
     try {
-      console.log('Processing scan for SRN:', srn);
+      toast('Processing scan for SRN:', srn);
       
       if (!presetField) {
         // If no preset field, just pass the QR code to parent

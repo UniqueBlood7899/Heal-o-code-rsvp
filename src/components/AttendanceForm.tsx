@@ -1,4 +1,3 @@
-//src/components/AttendanceForm.tsx
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
@@ -17,11 +16,12 @@ interface AttendanceFormProps {
   qrCode: string;
   onReset: () => void;
   presetField: 'entry' | 'dinner' | 'snacks' | 'breakfast' | null;
+  isScanning?: boolean; // Add this prop to indicate when scanning is active
 }
 
 type AttendanceField = 'entry' | 'dinner' | 'snacks' | 'breakfast';
 
-export function AttendanceForm({ qrCode, onReset, presetField }: AttendanceFormProps) {
+export function AttendanceForm({ qrCode, onReset, presetField, isScanning = false }: AttendanceFormProps) {
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -139,6 +139,9 @@ export function AttendanceForm({ qrCode, onReset, presetField }: AttendanceFormP
     { key: 'breakfast' as const, label: 'Breakfast' }
   ];
 
+  // Find the label for the currently selected field
+  const selectedFieldLabel = attendanceFields.find(f => f.key === selectedField)?.label || capitalize(selectedField);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8 px-4">
       <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6">
@@ -159,18 +162,28 @@ export function AttendanceForm({ qrCode, onReset, presetField }: AttendanceFormP
           <label htmlFor="field-select" className="block text-sm font-medium text-gray-700 mb-2">
             Select Field to Update
           </label>
-          <select
-            id="field-select"
-            value={selectedField}
-            onChange={(e) => setSelectedField(e.target.value as AttendanceField)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            {attendanceFields.map(({ key, label }) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
+          
+          {isScanning ? (
+            // Show as text when scanning is active
+            <div className="w-full p-3 border border-gray-300 bg-gray-100 rounded-lg text-gray-700">
+              {selectedFieldLabel}
+            </div>
+          ) : (
+            // Show dropdown when not scanning
+            <select
+              id="field-select"
+              value={selectedField}
+              onChange={(e) => setSelectedField(e.target.value as AttendanceField)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              disabled={isScanning} // Optional: also disable dropdown when scanning
+            >
+              {attendanceFields.map(({ key, label }) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <button

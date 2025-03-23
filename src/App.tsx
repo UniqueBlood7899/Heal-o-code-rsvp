@@ -1,4 +1,3 @@
-//src/App.tsx
 import React, { useState } from 'react';
 import { QRScanner } from './components/QRScanner';
 import { AttendanceForm } from './components/AttendanceForm';
@@ -9,6 +8,7 @@ function App() {
   const [showScanner, setShowScanner] = useState(false);
   const [scannedQR, setScannedQR] = useState<string | null>(null);
   const [selectedField, setSelectedField] = useState<'entry' | 'dinner' | 'snacks' | 'breakfast' | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
 
   const handleScan = (qrCode: string) => {
     setScannedQR(qrCode);
@@ -33,6 +33,21 @@ function App() {
     }
   };
 
+  const handleScanningStateChange = (scanning: boolean) => {
+    setIsScanning(scanning);
+  };
+
+  // Function to get display name for the selected field
+  const getFieldDisplayName = () => {
+    switch(selectedField) {
+      case 'entry': return 'Entry';
+      case 'dinner': return 'Dinner';
+      case 'snacks': return 'Snacks';
+      case 'breakfast': return 'Breakfast';
+      default: return 'Select Type';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Toaster position="top-center" />
@@ -51,17 +66,26 @@ function App() {
 
         <div className="max-w-md mx-auto mb-6">
           <label className="block text-gray-700 mb-2">Select Attendance Type:</label>
-          <select
-            className="w-full p-3 border border-gray-300 rounded-lg"
-            value={selectedField || ""}
-            onChange={(e) => setSelectedField(e.target.value as any)}
-          >
-            <option value="" disabled>Select Type</option>
-            <option value="entry">Entry</option>
-            <option value="dinner">Dinner</option>
-            <option value="snacks">Snacks</option>
-            <option value="breakfast">Breakfast</option>
-          </select>
+          {showScanner && isScanning ? (
+            // Show as text when scanner is active
+            <div className="w-full p-3 border border-gray-300 bg-gray-100 rounded-lg text-gray-700">
+              {getFieldDisplayName()}
+            </div>
+          ) : (
+            // Show the dropdown when scanner is not active
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg"
+              value={selectedField || ""}
+              onChange={(e) => setSelectedField(e.target.value as any)}
+              disabled={showScanner && isScanning}
+            >
+              <option value="" disabled>Select Type</option>
+              <option value="entry">Entry</option>
+              <option value="dinner">Dinner</option>
+              <option value="snacks">Snacks</option>
+              <option value="breakfast">Breakfast</option>
+            </select>
+          )}
         </div>
 
         <div className="max-w-md mx-auto">
@@ -69,7 +93,8 @@ function App() {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <QRScanner 
                 onScanSuccess={handleScan} 
-                presetField={selectedField} 
+                presetField={selectedField}
+                onScanningStateChange={handleScanningStateChange}
               />
             </div>
           ) : (
