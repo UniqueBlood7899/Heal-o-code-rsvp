@@ -57,17 +57,17 @@ export function QRScanner({ onScanSuccess, presetField, onScanningStateChange }:
       }
 
       // Check if already marked
-      if (participant[presetField] === 'done') {
+      if (participant[presetField] === true) {
         toast.success(`${capitalize(presetField)} for ${participant.srn} is already marked as done!`);
         setTimeout(() => { startScanner(); }, 1500);
         return;
       }
 
-      // Update attendance directly
+      // Update attendance with boolean true
       const { error: updateError } = await supabase
         .from('participant')
         .update({
-          [presetField]: 'done'
+          [presetField]: true
         })
         .eq('srn', participant.srn);
 

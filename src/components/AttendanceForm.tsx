@@ -6,10 +6,10 @@ import { Check, X, ArrowLeft } from 'lucide-react';
 
 interface Participant {
   srn: string;
-  entry: string | null;
-  dinner: string | null;
-  snacks: string | null;
-  breakfast: string | null;
+  entry: boolean;
+  dinner: boolean;
+  snacks: boolean;
+  breakfast: boolean;
 }
 
 interface AttendanceFormProps {
@@ -73,7 +73,7 @@ export function AttendanceForm({ qrCode, onReset, presetField, isScanning = fals
       console.log('Updating attendance for SRN:', participant.srn, 'Field:', field);
   
       // Check if already marked
-      if (participant[field] === 'done') {
+      if (participant[field] === true) {
         toast.success(`${capitalize(field)} for ${participant.srn} is already marked as done!`);
         return;
       }
@@ -81,13 +81,13 @@ export function AttendanceForm({ qrCode, onReset, presetField, isScanning = fals
       const { error } = await supabase
         .from('participant')
         .update({
-          [field]: 'done'
+          [field]: true
         })
         .eq('srn', participant.srn);
   
       if (error) throw error;
   
-      setParticipant(prev => prev ? { ...prev, [field]: 'done' } : null);
+      setParticipant(prev => prev ? { ...prev, [field]: true } : null);
   
       // Show success message
       toast.success(`${capitalize(field)} for ${participant.srn} has been marked as done`);
@@ -199,13 +199,13 @@ export function AttendanceForm({ qrCode, onReset, presetField, isScanning = fals
             <div
               key={key}
               className={`flex items-center justify-between p-4 rounded-xl ${
-                participant[key] === 'done'
+                participant[key] === true
                   ? 'bg-green-100 text-green-800'
                   : 'bg-gray-100 text-gray-800'
               }`}
             >
               <span className="font-medium">{label}</span>
-              {participant[key] === 'done' ? (
+              {participant[key] === true ? (
                 <Check className="w-6 h-6 text-green-600" />
               ) : (
                 <X className="w-6 h-6 text-gray-400" />
